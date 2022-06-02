@@ -1,0 +1,4 @@
+project: PROJECT
+target: arrow-ipc-file-fuzz
+cmds:
+- cmd: /out/arrow-ipc-file-fuzz
