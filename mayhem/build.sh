@@ -27,8 +27,11 @@ export ASAN_OPTIONS="detect_leaks=0"
 
 cmake ${ARROW} -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER="${CC:-clang}" \
+    -DCMAKE_CXX_COMPILER="${CXX:-clang++}" \
     -DARROW_DEPENDENCY_SOURCE=BUNDLED \
-    -DBOOST_SOURCE=SYSTEM \
+    -DBOOST_SOURCE=BUNDLED \
+    -DGTest_SOURCE=SYSTEM \
     -DCMAKE_C_FLAGS="${CFLAGS}" \
     -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
     -DARROW_EXTRA_ERROR_CONTEXT=off \
@@ -62,5 +65,3 @@ cmake ${ARROW} -GNinja \
 cmake --build .
 
 cp -a release/* ${OUT}
-
-${ARROW}/build-support/fuzzing/generate_corpuses.sh ${OUT}

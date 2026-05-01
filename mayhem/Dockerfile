@@ -14,14 +14,33 @@
 #
 ################################################################################
 
-FROM gcr.io/oss-fuzz-base/base-builder
+FROM --platform=linux/amd64 ubuntu:22.04
 
-ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update -y -q && apt-get update -y -q && apt-get install -y -q --no-install-recommends bison build-essential cmake flex libboost-all-dev ninja-build python3
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -y -q && apt-get install -y -q --no-install-recommends \
+    bison \
+    build-essential \
+    clang \
+    cmake \
+    flex \
+    libgtest-dev \
+    libgmock-dev \
+    ninja-build \
+    python3 \
+    zip \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY . $SRC/arrow
+COPY . /src/arrow
 
-COPY mayhem/build.sh $SRC/
+WORKDIR /work
 
-ENV FUZZING_LANGUAGE=c++
-RUN compile
+ENV CC=clang
+ENV CXX=clang++
+ENV CFLAGS="-O1 -fno-omit-frame-pointer -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -fsanitize=address -fsanitize-address-use-after-scope -fsanitize=fuzzer-no-link"
+ENV CXXFLAGS="-O1 -fno-omit-frame-pointer -DFUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION -fsanitize=address -fsanitize-address-use-after-scope -fsanitize=fuzzer-no-link"
+ENV OUT=/out
+ENV SRC=/src
+ENV WORK=/work
+
+COPY mayhem/build.sh /build.sh
+RUN chmod +x /build.sh && mkdir -p /out && /build.sh
